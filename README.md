@@ -68,3 +68,53 @@ services:
     depends_on:
       - db
 ```
+
+Этот файл нужно запустить командой ```docker compose up```
+
+### JWT
+#### Регистрация 
+
+Сначала надо добавить пользака в базу. Обязательно через сервис. Здесь шифруется пароль и в зашифрованном виде попадает в бд.
+Пока что у пользователей есть две роли **ADMIN** и **USER**
+```
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "Dmity",
+  "password": "DavidLohZhestkiy",
+  "role": "USER",
+  "metadata": " { \"name\" :  \"Dmitry\", \"lastname\" : \"Malyshev\" } "
+}
+```
+
+#### Логин
+
+Потом получить токен.
+
+```
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "Dmitry",
+  "password": "DavidLohZhestkiy"
+}
+```
+
+В ответ будет что-то типа : 
+```
+eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAiLCJ1cG4iOiJEbWl0cnkiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTczNzQxMTUwMiwiZXhwIjoxNzM3NDE1MTAyLCJqdGkiOiI4ZjViZmJkOS02YTZhLTQ3NTktYTgzMC0zNmY2ZTc3YjdhZWEifQ.rXqyy7XGRmXR735pEZHw4BVfDDAIuH_PvdZxPbJoKhhDbo8CpbeP-a-UfMGy0_WZ7oPWIbrQEjbbq8WwnMD_eD5Y4RB4EkdSk1eDoswcbZuFUbcXo0DMfdoG0JgzOXQBsCX2V9O84WhIOqU9F80XAXHSR1y30PsIbhMQsszMFxngyo37WG_-NUkCfMlEaXwfZaXX7suQQxsmEczjqcThxxuQG15M1hGRpIR2CuakcQW98HqJDlqt6TOcVax0J-AUMGoTW1e8FPocsPhjM3cpnletev-IqEHwvUF34Qzin3SReFYOtp_yR2reQcrs2MKNbVunpb351OAhBL7UmRG-nA
+```
+
+Проверить содержимое токена можешь на сайте https://jwt.io.
+Алгоритм хэширования ```RS256```
+
+#### Работа с апи 
+
+Добавляешь заголовок Authorization и перед токеном добавляешь Bearer. 
+
+```
+GET http://localhost:8080/api/accounts/Dmitry
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAiLCJ1cG4iOiJEbWl0cnkiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTczNzQxMTUwMiwiZXhwIjoxNzM3NDE1MTAyLCJqdGkiOiI4ZjViZmJkOS02YTZhLTQ3NTktYTgzMC0zNmY2ZTc3YjdhZWEifQ.rXqyy7XGRmXR735pEZHw4BVfDDAIuH_PvdZxPbJoKhhDbo8CpbeP-a-UfMGy0_WZ7oPWIbrQEjbbq8WwnMD_eD5Y4RB4EkdSk1eDoswcbZuFUbcXo0DMfdoG0JgzOXQBsCX2V9O84WhIOqU9F80XAXHSR1y30PsIbhMQsszMFxngyo37WG_-NUkCfMlEaXwfZaXX7suQQxsmEczjqcThxxuQG15M1hGRpIR2CuakcQW98HqJDlqt6TOcVax0J-AUMGoTW1e8FPocsPhjM3cpnletev-IqEHwvUF34Qzin3SReFYOtp_yR2reQcrs2MKNbVunpb351OAhBL7UmRG-nA
+```
