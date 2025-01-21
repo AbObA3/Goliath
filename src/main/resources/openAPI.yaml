@@ -1,0 +1,239 @@
+openapi: 3.0.3
+info:
+  title: Online Courses API
+  version: 1.0.0
+tags:
+  - name: Users
+    description: Операции с пользователями
+  - name: Courses
+    description: Операции с курсами
+paths:
+  /auth/login:
+    post:
+      tags:
+        - Users
+      summary: Авторизация пользователя
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            example:
+              username: "test_user"
+              password: "password123"
+      responses:
+        '200':
+          description: Успешная авторизация
+          content:
+            application/json:
+              example: "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
+        '401':
+          description: Неверные учетные данные
+          content:
+            text/plain:
+              example: "Invalid credentials: wrong password"
+
+  /auth/register:
+    post:
+      tags:
+        - Users
+      summary: Регистрация пользователя
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+            example:
+              username: "new_user"
+              password: "password123"
+              role: "USER"
+              metadata: "{\"age\":25,\"preferences\":{\"category\":\"technology\"}}"
+      responses:
+        '201':
+          description: Успешная регистрация
+        '400':
+          description: Ошибка в запросе
+
+  /auth/logout:
+    post:
+      tags:
+        - Users
+      summary: Выход из системы
+      parameters:
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+            example: "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
+      responses:
+        '200':
+          description: Успешный выход
+        '400':
+          description: Отсутствует заголовок Authorization
+
+  /api/accounts/{username}:
+    get:
+      tags:
+        - Users
+      summary: Получение данных пользователя
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "test_user"
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+            example: "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
+      responses:
+        '200':
+          description: Данные пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: Пользователь не найден
+
+  /api/accounts/metadata:
+    post:
+      tags:
+        - Users
+      summary: Добавление метаданных
+      parameters:
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+            example: "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MetadataRequest'
+            example:
+              username: "test_user"
+              metadata: "{\"age\":30,\"preferences\":{\"language\":\"english\"}}"
+      responses:
+        '202':
+          description: Метаданные успешно добавлены
+        '500':
+          description: Ошибка сервера
+
+  /api/courses:
+    get:
+      tags:
+        - Courses
+      summary: Получение списка курсов
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 10
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+            example: "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
+      responses:
+        '200':
+          description: Список курсов
+          content:
+            application/json:
+              example:
+                - id: 1
+                  title: "Introduction to Programming"
+                  description: "Learn the basics of programming."
+                  imageUrl: "https://example.com/image1.jpg"
+                - id: 2
+                  title: "Advanced Databases"
+                  description: "Deep dive into database systems."
+                  imageUrl: "https://example.com/image2.jpg"
+        '500':
+          description: Ошибка сервера
+
+  /api/courses/{id}:
+    get:
+      tags:
+        - Courses
+      summary: Получение курса по ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            example: 1
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+            example: "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
+      responses:
+        '200':
+          description: Данные курса
+          content:
+            application/json:
+              example:
+                id: 1
+                title: "Introduction to Programming"
+                description: "Learn the basics of programming."
+                imageUrl: "https://example.com/image1.jpg"
+        '404':
+          description: Курс не найден
+
+components:
+  schemas:
+    LoginRequest:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+    RegisterRequest:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+        role:
+          type: string
+        metadata:
+          type: string
+    MetadataRequest:
+      type: object
+      properties:
+        username:
+          type: string
+        metadata:
+          type: string
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        role:
+          type: string
+        metadata:
+          type: string

@@ -1,0 +1,20 @@
+services:
+  db:
+    image: postgres:15
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+  backend:
+    image: aboba3/goliath
+    ports:
+      - "8080:8080"
+    environment:
+      QUARKUS_DATASOURCE_URL: jdbc:postgresql://db:5432/online_courses
+      QUARKUS_DATASOURCE_USERNAME: postgres
+      QUARKUS_DATASOURCE_PASSWORD: postgres
+      QUARKUS_ISSUER: http://backend:8080
+    depends_on:
+      - db
